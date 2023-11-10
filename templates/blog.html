@@ -19,38 +19,46 @@
                     <div class="col-lg-8">
                         <div class="row">
                             {% for i in blogs %}
-                            <div class="col-md-12">
-                                <div class="blog-entry ftco-animate d-md-flex">
-                                    <a href="{% url 'detail' i.pk %}" class="img img-2"
-                                       style="background-image: url({{ i.image.url }});"></a>
-                                    <div class="text text-2 p-4">
-                                        <h3 class="mb-2"><a href="{% url 'detail' i.pk %}">{{ i.title }}</a></h3>
-                                        <div class="meta-wrap">
-                                            <p class="meta">
-                                                <span>{{ i.create_date }}</span>
-                                                <span><a href="{% url 'detail' i.pk %}">{{ i.category }}</a></span>
-                                                <span>{{ i.comments.count }} Comment</span>
-                                            </p>
+                                <div class="col-md-12">
+                                    <div class="blog-entry ftco-animate d-md-flex">
+                                        <a href="{% url 'detail' i.pk %}" class="img img-2"
+                                           style="background-image: url({{ i.image.url }});"></a>
+                                        <div class="text text-2 p-4">
+                                            <h3 class="mb-2"><a href="{% url 'detail' i.pk %}">{{ i.title }}</a></h3>
+                                            <div class="meta-wrap">
+                                                <p class="meta">
+                                                    <span>{{ i.create_date }}</span>
+                                                    <span><a href="?cat={{ i.category }}">{{ i.category }}</a></span>
+                                                    <span>{{ i.comments.count }} Comment</span>
+                                                </p>
+                                            </div>
+                                            <p class="mb-4">{{ i.bodyone|truncatewords:15|linebreaks }}</p>
+                                            <p><a href="{% url 'detail' i.pk %}" class="btn-custom">Read More <span
+                                                    class="ion-ios-arrow-forward"></span></a></p>
                                         </div>
-                                        <p class="mb-4">{{ i.bodyone|truncatewords:15|linebreaks }}</p>
-                                        <p><a href="{% url 'detail' i.pk %}" class="btn-custom">Read More <span
-                                                class="ion-ios-arrow-forward"></span></a></p>
                                     </div>
                                 </div>
-                            </div>
                             {% endfor %}
                         </div>
                         <div class="row">
                             <div class="col">
                                 <div class="block-27">
                                     <ul>
-                                        <li><a href="#">&lt;</a></li>
-                                        <li class="active"><span>1</span></li>
-                                        <li><a href="#">2</a></li>
-                                        <li><a href="#">3</a></li>
-                                        <li><a href="#">4</a></li>
-                                        <li><a href="#">5</a></li>
-                                        <li><a href="#">&gt;</a></li>
+                                        {% if blogs.has_previous %}
+                                            <li><a href="?page={{ blogs.previous_page_number }}"><</a></li>
+                                        {% endif %}
+
+                                        {% for i in blogs.paginator.page_range %}
+                                            {% if blogs.number == i %}
+                                                <li class="active"><a href="?page={{ i }}">{{ i }}</a></li>
+                                            {% else %}
+                                                <li><a href="?page={{ i }}">{{ i }}</a></li>
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if blogs.has_next %}
+                                            <li><a href="?page={{ blogs.next_page_number }}">></a></li>
+                                        {% endif %}
                                     </ul>
                                 </div>
                             </div>
@@ -68,33 +76,39 @@
                         <div class="sidebar-box ftco-animate">
                             <h3 class="sidebar-heading">Categories</h3>
                             <ul class="categories">
+                                <li><a href="?cat= ">All<span></span></a>
+                                </li>
+
                                 {% for i in category %}
-                                <li><a href="#">{{ i.title }}<span>({{ i.category.count }})</span></a></li>
+                                    <li><a href="?cat={{ i.title }}">{{ i.title }}<span>({{ i.category.count }})</span></a>
+                                    </li>
                                 {% endfor %}
                             </ul>
                         </div>
                         <div class="sidebar-box ftco-animate">
                             <h3 class="sidebar-heading">Popular Articles</h3>
                             {% for i in popular %}
-                            <div class="block-21 mb-4 d-flex">
-                                <a class="blog-img mr-4" style="background-image: url({{ i.image.url }});"></a>
-                                <div class="text">
-                                    <h3 class="heading"><a href="#">{{ i.title }}</a>
-                                    </h3>
-                                    <div class="meta">
-                                        <div><a href="#"><span class="icon-calendar"></span>{{i.create_date }}</a></div>
-                                        <div><a href="#"><span class="icon-chat"></span>{{ i.comments.count }}</a></div>
+                                <div class="block-21 mb-4 d-flex">
+                                    <a class="blog-img mr-4" style="background-image: url({{ i.image.url }});"></a>
+                                    <div class="text">
+                                        <h3 class="heading"><a href="#">{{ i.title }}</a>
+                                        </h3>
+                                        <div class="meta">
+                                            <div><a href="#"><span class="icon-calendar"></span>{{ i.create_date }}</a>
+                                            </div>
+                                            <div><a href="#"><span class="icon-chat"></span>{{ i.comments.count }}</a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
                             {% endfor %}
                         </div>
                         <div class="sidebar-box ftco-animate">
                             <h3 class="sidebar-heading">Tag Cloud</h3>
                             <ul class="tagcloud">
                                 {% for i in tag %}
-                                <a href="#" class="tag-cloud-link">{{ i.title }}</a>
-                                {% endfor%}
+                                    <a href="#" class="tag-cloud-link">{{ i.title }}</a>
+                                {% endfor %}
                             </ul>
                         </div>
                         <div class="sidebar-box subs-wrap img" style="background-image: url(images/bg_1.jpg);">
@@ -105,7 +119,7 @@
                                 {% csrf_token %}
                                 <div class="form-group">
                                     {{ form.email }}
-{#                                    <input type="text" class="form-control" placeholder="Email Address">#}
+                                    {#                                    <input type="text" class="form-control" placeholder="Email Address">#}
                                     <input type="submit" value="Subscribe" class="mt-2 btn btn-white submit">
                                 </div>
                             </form>

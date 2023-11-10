@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from .models import About, Blog, Category, Tag, Comment, Collection, Contact
 from .forms import ContactForm, CommentForm, NewslatterForm
@@ -45,10 +46,16 @@ def serviceView(request):
 
 def blogView(request):
     about = About.objects.all()
-    blog = Blog.objects.all().order_by('-id')
+    # blog = Blog.objects.all().order_by('-id')
+    p = Paginator(Blog.objects.all().order_by('-id'), 2)
+    page = request.GET.get('page')
+    blog = p.get_page(page)
     popular = Blog.objects.all().order_by('-id')[:3]
     category = Category.objects.all()
     tag = Tag.objects.all()
+    cat = request.GET.get("cat")
+    if cat:
+        blog = blog.filter(category__title__iexact=cat)
     form = NewslatterForm(request.POST or None)
     if form.is_valid():
         form.save()
@@ -70,6 +77,9 @@ def detailView(request, pk):
     popular = Blog.objects.all().order_by('-id')[:3]
     category = Category.objects.all()
     tag = Tag.objects.all()
+    cat = request.GET.get("cat")
+    if cat:
+        detail = detail.filter(category__title__iexact=cat)
     form = CommentForm(request.POST or None)
     if form.is_valid():
         com = form.save(commit=False)

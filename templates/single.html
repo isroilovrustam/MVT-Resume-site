@@ -92,7 +92,7 @@
                             <h3 class="sidebar-heading">Categories</h3>
                             <ul class="categories">
                                 {% for i in category %}
-                                <li><a href="#">{{ i.title }} <span>({{ i.category.count }})</span></a></li>
+                                    <li><a href="{% url 'blog' %}?cat={{ i.title }}">{{ i.title }} <span>({{ i.category.count }})</span></a></li>
                                 {% endfor %}
                             </ul>
                         </div>
